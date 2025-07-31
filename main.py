@@ -9,6 +9,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://3-d-organic-health.vercel.app"
+        "https://3-d-organic-health-git-jppg-ynhuks-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
