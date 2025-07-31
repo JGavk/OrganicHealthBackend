@@ -11,14 +11,15 @@ router = APIRouter()
 
 @router.get("/questions", tags=["Quiz"])
 async def get_random_questions(limit: int = 5):
-    pipeline = [{"$sample": {"size": limit}}]
-    questions_cursor = database["questions"].aggregate(pipeline)
-    questions = []
-    async for q in questions_cursor:
-        q["_id"] = str(q["_id"])
-        questions.append(q)
-
-    return questions
+    try:
+        pipeline = [{"$sample": {"size": limit}}]
+        questions = await database["questions"].aggregate(pipeline).to_list(length=limit)
+        for q in questions:
+            q["_id"] = str(q["_id"])
+        return questions
+    except Exception as e:
+        print("Error al obtener preguntas:", e)
+        raise HTTPException(status_code=500, detail="Error interno al obtener preguntas")
 
 
 @router.post("/submit-answer", tags=["Quiz"])
