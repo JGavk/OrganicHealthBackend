@@ -1,0 +1,18 @@
+# .gitignore
+
+# Ignorar entornos virtuales
+venv/
+.env
+.idea/
+.vscode/
+# Python
+__pycache__/
+*.py[cod]
+
+# Otros
+*.log
+*.sqlite3
+.DS_Store
+node_modules/
+dist/
+build/
