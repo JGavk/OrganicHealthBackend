@@ -41,3 +41,44 @@ async def submit_answer(answer: UserAnswer):
     await database["answers"].insert_one(result)
 
     return {"message": "Answer submitted", "is_correct": is_correct}
+
+
+@router.get("/leaderboard", tags=["Quiz"])
+async def get_leaderboard(limit: int = 10):
+    try:
+        pipeline = [
+            {
+                "$group": {
+                    "_id": "$user_id",
+                    "correct_answers": {
+                        "$sum": {
+                            "$cond": [{"$eq": ["$is_correct", True]}, 1, 0]
+                        }
+                    },
+                    "total_answers": {"$sum": 1},
+                }
+            },
+            {
+                "$addFields": {
+                    "accuracy": {
+                        "$cond": [
+                            {"$eq": ["$total_answers", 0]},
+                            0,
+                            {
+                                "$multiply": [
+                                    {"$divide": ["$correct_answers", "$total_answers"]},
+                                    100,
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {"$sort": {"correct_answers": -1, "accuracy": -1}},
+            {"$limit": limit}
+        ]
+        leaderboard = await database["answers"].aggregate(pipeline).to_list(length=limit)
+        return leaderboard
+    except Exception as e:
+        print("Error obteniendo leaderboard:", e)
+        raise HTTPException(status_code=500, detail="Error interno al obtener el ranking")
